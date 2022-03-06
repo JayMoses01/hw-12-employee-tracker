@@ -42,119 +42,132 @@ const initialPrompt = () => {
     });
   };
 
-
-  const addEmployee = () => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'empFirstName',
-        message: "What is the employee's first name?",
-      },
-      {
-        type: 'input',
-        name: 'empLastName',
-        message: "What is the employee's last name?",
-      },
-      {
-        type: 'input',
-        name: 'empRole',
-        message: "What is the employee's role?",
-        // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
-        choices: ["Customer Service","Sales Lead","Salesperson","Lead Engineer","Software Engineer","Account Manager","Accountant","Legal Team Lead","Lawyer"]
-      },
-      {
-        type: 'input',
-        name: 'empMgr',
-        message: "Who is the employee's manager?",
-        choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"]
-      },
-    ])
-    .then((answers) => {
-      let employee = new Employee(answers.empFirstName, answers.empLastName, answers.empRole, answers.empMgr);
-      allEmployees.push(employee);
-      console.log(`Added ${answers.empFirstName + answers.empLastName} to the database`)
-      return initialPrompt();
-    });
-  };
+// Presents user with a report of all employees.
+const viewAllEmployees = () => {
 
 
-  const addRole = () => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'newRole',
-        message: "What is the name of the role?",
-      },
-      {
-        type: 'input',
-        name: 'newRoleSalary',
-        message: "What is the salary of the role?",
-      },
-      {
-        type: 'input',
-        name: 'newRoleDept',
-        message: "Which department does the role belong to?",
-        // Choices should actually be a SELECT statement to return all current departments--not hard-coded.
-        choices: ["Engineering","Finance","Legal","Sales","Service"]
-      },
-    ])
-    .then((answers) => {
-      let role = new Role(answers.newRole, answers.newRoleSalary, newRoleDept);
-      allRoles.push(role);
-      console.log(`Added ${answers.newRole} to the database`)
-      return initialPrompt();
-    });
-  };
+}
+
+// Allows user to add employee.
+const addEmployee = () => {
+  return inquirer.prompt([
+    {
+      type: 'input',
+      name: 'empFirstName',
+      message: "What is the employee's first name?",
+    },
+    {
+      type: 'input',
+      name: 'empLastName',
+      message: "What is the employee's last name?",
+    },
+    {
+      type: 'input',
+      name: 'empRole',
+      message: "What is the employee's role?",
+      // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
+      choices: ["Customer Service","Sales Lead","Salesperson","Lead Engineer","Software Engineer","Account Manager","Accountant","Legal Team Lead","Lawyer"]
+    },
+    {
+      type: 'input',
+      name: 'empMgr',
+      message: "Who is the employee's manager?",
+      choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"]
+    },
+  ])
+  .then((answers) => {
+    let employee = new Employee(answers.empFirstName, answers.empLastName, answers.empRole, answers.empMgr);
+    allEmployees.push(employee);
+    console.log(`Added ${answers.empFirstName + answers.empLastName} to the database`)
+    return initialPrompt();
+  });
+};
+
+// Allows user to update an employee's role with the organization.
+const updateEmployeeRole = () => {
+  return inquirer.prompt([
+    {
+      type: 'input',
+      name: 'empToUpdate',
+      message: "Which employee's role do you want to update?",
+      // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
+      choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Brown","Sarah Lourd","Tom Allen","Sam Kash"]
+    },
+    {
+      type: 'input',
+      name: 'newEmpRole',
+      message: "Which role do you want to assign the selected employee?",
+      // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
+      choices: ["Sales Lead","Salesperson","Lead Engineer"]
+    },
+  ])
+  .then((answers) => {
+    let department = new Department(answers.newDepartment);
+    allDepartments.push(department);
+    console.log(`Updated role for ${answers.empToUpdate} in the database`)
+    return initialPrompt();
+
+  });
+};
+
+// Presents user with a report of all roles.
+const viewAllRoles = () => {
 
 
-  const addDepartment = () => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'newDepartment',
-        message: "What is the name of the department?",
-      },
-    ])
-    .then((answers) => {
-      let department = new Department(answers.newDepartment);
-      allDepartments.push(department);
-      console.log(`Added ${answers.newDepartment} to the database`)
-      return initialPrompt();
+}
 
-    });
-  };
+// Allows user to add a role to the organization.
+const addRole = () => {
+  return inquirer.prompt([
+    {
+      type: 'input',
+      name: 'newRole',
+      message: "What is the name of the role?",
+    },
+    {
+      type: 'input',
+      name: 'newRoleSalary',
+      message: "What is the salary of the role?",
+    },
+    {
+      type: 'input',
+      name: 'newRoleDept',
+      message: "Which department does the role belong to?",
+      // Choices should actually be a SELECT statement to return all current departments--not hard-coded.
+      choices: ["Engineering","Finance","Legal","Sales","Service"]
+    },
+  ])
+  .then((answers) => {
+    let role = new Role(answers.newRole, answers.newRoleSalary, newRoleDept);
+    allRoles.push(role);
+    console.log(`Added ${answers.newRole} to the database`)
+    return initialPrompt();
+  });
+};
 
-
-  const updateEmployeeRole = () => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'empToUpdate',
-        message: "Which employee's role do you want to update?",
-        // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
-        choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Brown","Sarah Lourd","Tom Allen","Sam Kash"]
-      },
-      {
-        type: 'input',
-        name: 'newEmpRole',
-        message: "Which role do you want to assign the selected employee?",
-        // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
-        choices: ["Sales Lead","Salesperson","Lead Engineer"]
-      },
-    ])
-    .then((answers) => {
-      let department = new Department(answers.newDepartment);
-      allDepartments.push(department);
-      console.log(`Updated role for ${answers.empToUpdate} in the database`)
-      return initialPrompt();
-
-    });
-  };
+// Presents user with a report of all departments.
+const viewAllDepartments = () => {
 
 
+}
 
+// Allows user to add a department to the organization.
+const addDepartment = () => {
+  return inquirer.prompt([
+    {
+      type: 'input',
+      name: 'newDepartment',
+      message: "What is the name of the department?",
+    },
+  ])
+  .then((answers) => {
+    let department = new Department(answers.newDepartment);
+    allDepartments.push(department);
+    console.log(`Added ${answers.newDepartment} to the database`)
+    return initialPrompt();
 
-
+  });
+};
 
 
   
@@ -166,13 +179,26 @@ const initialPrompt = () => {
 
 
 
-  // This function triggers all user prompts upon running "node index.js" from the command line.
+
+
+
+
+
+
+
+
+
+
+
+
+
+// This function triggers all user prompts upon running "node index.js" from the command line.
 const init = () => {
     initialPrompt()
   };
   
-  // This function calls the "init()" function to start the initial prompt.
-  init();
+// This function calls the "init()" function to start the initial prompt.
+init();
 
 
 
