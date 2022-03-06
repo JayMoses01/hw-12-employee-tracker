@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const fs = require('fs');
+const fs = require('fs'); // Can probably remove this one.
 const Department = require('./lib/Department')
 const Employee = require('./lib/Employee')
 const Role = require('./lib/Role')
@@ -43,8 +43,8 @@ const initialPrompt = () => {
   };
 
 // Presents user with a report of all employees.
-const viewAllEmployees = () => {
-
+const viewAllEmployees = async () => {
+  const choices = await organization_db
 
 }
 
@@ -66,13 +66,14 @@ const addEmployee = () => {
       name: 'empRole',
       message: "What is the employee's role?",
       // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
-      choices: ["Customer Service","Sales Lead","Salesperson","Lead Engineer","Software Engineer","Account Manager","Accountant","Legal Team Lead","Lawyer"]
+      choices: ["Customer Service","Sales Lead","Salesperson","Lead Engineer","Software Engineer","Account Manager","Accountant","Legal Team Lead","Lawyer"] // Use variable called "empRoles"
     },
     {
       type: 'input',
       name: 'empMgr',
       message: "Who is the employee's manager?",
-      choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"]
+      // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
+      choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"] // Use variable called "employees"
     },
   ])
   .then((answers) => {
@@ -91,7 +92,7 @@ const updateEmployeeRole = () => {
       name: 'empToUpdate',
       message: "Which employee's role do you want to update?",
       // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
-      choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Brown","Sarah Lourd","Tom Allen","Sam Kash"]
+      choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Brown","Sarah Lourd","Tom Allen","Sam Kash"] // Use variable called "employees"
     },
     {
       type: 'input',
@@ -111,7 +112,7 @@ const updateEmployeeRole = () => {
 };
 
 // Presents user with a report of all roles.
-const viewAllRoles = () => {
+const viewAllRoles = async () => {
 
 
 }
@@ -146,7 +147,7 @@ const addRole = () => {
 };
 
 // Presents user with a report of all departments.
-const viewAllDepartments = () => {
+const viewAllDepartments = async () => {
 
 
 }
