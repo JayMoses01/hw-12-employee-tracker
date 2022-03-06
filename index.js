@@ -132,7 +132,7 @@ const initialPrompt = () => {
         name: 'empToUpdate',
         message: "Which employee's role do you want to update?",
         // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
-        choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Lourd","Sarah Lourd","Tom Allen","Sam Kash","John Doe"]
+        choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Brown","Sarah Lourd","Tom Allen","Sam Kash"]
       },
       {
         type: 'input',
@@ -154,6 +154,10 @@ const initialPrompt = () => {
 
 
 
+
+
+
+  
 
 
 
