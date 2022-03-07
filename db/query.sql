@@ -1,29 +1,24 @@
+USE organization_db;
+
 /* View all employees: employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to */
-SELECT employee.id, employee.first_name, employee.last_name, role.title, department.department_name, role.salary, employee.manager_id
-FROM employee
-LEFT JOIN employee
-ON employee.role_id = role.id
-LEFT JOIN role
-ON role.department_id = department.id
-ORDER BY employee.id;
+SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id
+FROM employees_tb
+LEFT JOIN roles_tb
+ON employees_tb.role_id = roles_tb.id
+LEFT JOIN departments_tb
+ON roles_tb.department_id = departments_tb.id;
 
 
 /* View all roles: job title, role id, the department that role belongs to, and the salary for that role */
-SELECT role.title, role.id, department.name, role.salary
-FROM role
-LEFT JOIN role
-ON role.department_id = department.id;
-ORDER BY role.id;
+SELECT roles_tb.title, roles_tb.id, departments_tb.department_name, roles_tb.salary
+FROM roles_tb
+LEFT JOIN departments_tb
+ON roles_tb.department_id = departments_tb.id;
 
 
 /* View all departments: department names and department ids */
-SELECT department.department_name, department_id
-FROM department
-ORDER BY department_id;
-
-
-
-
+SELECT departments_tb.department_name, departments_tb.id
+FROM departments_tb;
 
 
 

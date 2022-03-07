@@ -26,13 +26,13 @@ const db = mysql.createConnection(
 
 /* View all employees: employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to */
 app.get('/api/employees', (req, res) => {
-    const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.department_name, role.salary, employee.manager_id
-    FROM employee
-    LEFT JOIN employee
-    ON employee.role_id = role.id
-    LEFT JOIN role
-    ON role.department_id = department.id
-    ORDER BY employee.id;`;
+    const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department_name, roles.salary, employees.manager_id
+    FROM employees
+    LEFT JOIN employees
+    ON employees.role_id = roles.id
+    LEFT JOIN roles
+    ON roles.department_id = departments.id
+    ORDER BY employees.id;`;
     
     db.query(sql, (err, rows) => {
       if (err) {
@@ -48,7 +48,7 @@ app.get('/api/employees', (req, res) => {
 
 // Add an employee
 app.post('/api/new-employee', ({ body }, res) => {
-    const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
       VALUES (?)`;
     const params = [body.empFirstName, body.empLastName, body.empRole, body.empMgr];
     
@@ -66,7 +66,7 @@ app.post('/api/new-employee', ({ body }, res) => {
 
 // Update employee's role
 app.put('/api/employees/:id', (req, res) => {
-    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+    const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
     const params = [req.body.empToUpdate, req.params.newEmpRole];
   
     db.query(sql, params, (err, result) => {
@@ -88,11 +88,11 @@ app.put('/api/employees/:id', (req, res) => {
 
 // View all roles.
 app.get('/api/roles', (req, res) => {
-    const sql = `SELECT role.title, role.id, department.name, role.salary
-    FROM role
-    LEFT JOIN role
-    ON role.department_id = department.id;
-    ORDER BY role.id;`;
+    const sql = `SELECT roles.title, roles.id, departments.name, roles.salary
+    FROM roles
+    LEFT JOIN roles
+    ON roles.department_id = departments.id;
+    ORDER BY roles.id;`;
     
     db.query(sql, (err, rows) => {
       if (err) {
@@ -108,7 +108,7 @@ app.get('/api/roles', (req, res) => {
 
 // Add a role.
 app.post('/api/new-role', ({ body }, res) => {
-    const sql = `INSERT INTO role (title, salary, department_id)
+    const sql = `INSERT INTO roles (title, salary, department_id)
       VALUES (?)`;
     const params = [body.newRole, body.newRoleSalary, body.newRoleDept];
     
@@ -126,8 +126,8 @@ app.post('/api/new-role', ({ body }, res) => {
 
 // View all departments.
 app.get('/api/departments', (req, res) => {
-    const sql = `SELECT department.department_name, department_id
-    FROM department
+    const sql = `SELECT departments.department_name, department_id
+    FROM departments
     ORDER BY department_id;`;
     
     db.query(sql, (err, rows) => {
@@ -144,7 +144,7 @@ app.get('/api/departments', (req, res) => {
 
 // Add a department.
 app.post('/api/new-department', ({ body }, res) => {
-    const sql = `INSERT INTO department (department_name)
+    const sql = `INSERT INTO departments (department_name)
       VALUES (?)`;
     const params = [body.newDepartment];
     

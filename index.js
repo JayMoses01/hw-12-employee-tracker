@@ -171,27 +171,6 @@ const addDepartment = () => {
 };
 
 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // This function triggers all user prompts upon running "node index.js" from the command line.
 const init = () => {
