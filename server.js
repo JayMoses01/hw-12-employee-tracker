@@ -47,7 +47,7 @@ app.get('/api/employees', (req, res) => {
 
 // Add an employee
 app.post('/api/new-employee', ({ body }, res) => {
-    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
+    const sql = `INSERT INTO employees_tb (first_name, last_name, role_id, manager_id)
       VALUES (?)`;
     const params = [body.empFirstName, body.empLastName, body.empRole, body.empMgr];
     
@@ -65,7 +65,7 @@ app.post('/api/new-employee', ({ body }, res) => {
 
 // Update employee's role
 app.put('/api/employees/:id', (req, res) => {
-    const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
+    const sql = `UPDATE employees_tb SET role_id = ? WHERE id = ?`;
     const params = [req.body.empToUpdate, req.params.newEmpRole];
   
     db.query(sql, params, (err, result) => {
@@ -106,7 +106,7 @@ app.get('/api/roles', (req, res) => {
 
 // Add a role.
 app.post('/api/new-role', ({ body }, res) => {
-    const sql = `INSERT INTO roles (title, salary, department_id)
+    const sql = `INSERT INTO roles_tb (title, salary, department_id)
       VALUES (?)`;
     const params = [body.newRole, body.newRoleSalary, body.newRoleDept];
     
@@ -141,7 +141,7 @@ app.get('/api/departments', (req, res) => {
 
 // Add a department.
 app.post('/api/new-department', ({ body }, res) => {
-    const sql = `INSERT INTO departments (department_name)
+    const sql = `INSERT INTO departments_tb (department_name)
       VALUES (?)`;
     const params = [body.newDepartment];
     
