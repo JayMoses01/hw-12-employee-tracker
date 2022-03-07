@@ -26,13 +26,12 @@ const db = mysql.createConnection(
 
 /* View all employees: employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to */
 app.get('/api/employees', (req, res) => {
-    const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department_name, roles.salary, employees.manager_id
-    FROM employees
-    LEFT JOIN employees
-    ON employees.role_id = roles.id
-    LEFT JOIN roles
-    ON roles.department_id = departments.id
-    ORDER BY employees.id;`;
+    const sql = `SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id
+    FROM employees_tb
+    LEFT JOIN roles_tb
+    ON employees_tb.role_id = roles_tb.id
+    LEFT JOIN departments_tb
+    ON roles_tb.department_id = departments_tb.id;`;
     
     db.query(sql, (err, rows) => {
       if (err) {
@@ -88,11 +87,10 @@ app.put('/api/employees/:id', (req, res) => {
 
 // View all roles.
 app.get('/api/roles', (req, res) => {
-    const sql = `SELECT roles.title, roles.id, departments.name, roles.salary
-    FROM roles
-    LEFT JOIN roles
-    ON roles.department_id = departments.id;
-    ORDER BY roles.id;`;
+    const sql = `SELECT roles_tb.title, roles_tb.id, departments_tb.department_name, roles_tb.salary
+    FROM roles_tb
+    LEFT JOIN departments_tb
+    ON roles_tb.department_id = departments_tb.id;`;
     
     db.query(sql, (err, rows) => {
       if (err) {
@@ -126,9 +124,8 @@ app.post('/api/new-role', ({ body }, res) => {
 
 // View all departments.
 app.get('/api/departments', (req, res) => {
-    const sql = `SELECT departments.department_name, department_id
-    FROM departments
-    ORDER BY department_id;`;
+    const sql = `SELECT departments_tb.department_name, departments_tb.id
+    FROM departments_tb;`;
     
     db.query(sql, (err, rows) => {
       if (err) {
