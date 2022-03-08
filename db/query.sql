@@ -25,7 +25,3 @@ FROM departments_tb;
 
 
 
-
-
-
-
