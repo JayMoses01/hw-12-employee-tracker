@@ -89,7 +89,9 @@ const viewAllEmployees = () => {
 // Allows user to add employee.
 const addEmployee = async () => {
   let roleChoices = await availableRoles();
+  let mgrChoices = await availableManagers();
   console.log(roleChoices);
+  console.log(mgrChoices);
   return new Promise( (resolve, reject) => {
     return inquirer.prompt([
       {
@@ -106,27 +108,41 @@ const addEmployee = async () => {
         type: 'list',
         name: 'empRole',
         message: "What is the employee's role?",
-        choices: roleChoices,
+        choices: roleChoices.map(item => item.title),
       },
       {
-        type: 'input',
+        type: 'list',
         name: 'empMgr',
         message: "Who is the employee's manager?",
-        // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
-        choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"] // Use variable called "employees"
+        choices: mgrChoices.map(item => item.Manager),
       },
   ])
-  .then((answers) => {
-    let employee = new Employee(answers.empFirstName, answers.empLastName, answers.empRole, answers.empMgr);
-    db.query(`INSERT INTO employees_tb (first_name, last_name, role_id, manager_id)
-    VALUES (?)`, employee)
-    console.log(`Added ${answers.empFirstName + answers.empLastName} to the database`)
-    if (err) reject (err);
+  .then(async (answers) => {
+
+    let roleResults = await db.promise().query('SELECT roles_tb.id FROM `roles_tb` WHERE `title` = ?', [answers.empRole]);
+
+    let mgrResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empMgr]);
+
+    console.log(roleResults);
+    console.log(mgrResults);
+
+    db.query(`INSERT INTO employees_tb SET ?`, {first_name: answers.empFirstName, last_name: answers.empLastName, role_id: roleResults[0].id, manager_id: mgrResults[0].id}, (err) => {
+        if (err) reject (err);
+        resolve();
+        console.log(`Added ${answers.empFirstName + ` ` + answers.empLastName} to the database`);
+        return initialPrompt();
+        })
+    
+
+
+
+    /*if (err) reject (err);*/
     resolve();
-    return initialPrompt();
+    //return initialPrompt();
   });
 });
 };
+
 
 // Allows user to update an employee's role with the organization.
 const updateEmployeeRole = () => {
@@ -181,6 +197,17 @@ const availableRoles = () => {
 
 availableRoles();
 
+
+const availableManagers = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT CONCAT(employees_tb.first_name, employees_tb.last_name) AS Manager FROM employees_tb;`, (err, res) => {
+          if (err) reject(err);
+          resolve(res);
+      });
+  });
+}
+
+availableManagers();
 
 
 // Allows user to add a role to the organization.
