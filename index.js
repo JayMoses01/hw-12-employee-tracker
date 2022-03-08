@@ -123,22 +123,18 @@ const addEmployee = async () => {
 
     let mgrResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empMgr]);
 
-    console.log(roleResults);
-    console.log(mgrResults);
+    console.log(roleResults[0][0].id);
+    console.log(mgrResults[0][0].id);
 
-    db.query(`INSERT INTO employees_tb SET ?`, {first_name: answers.empFirstName, last_name: answers.empLastName, role_id: roleResults[0].id, manager_id: mgrResults[0].id}, (err) => {
+    db.query(`INSERT INTO employees_tb SET ?`, {first_name: answers.empFirstName, last_name: answers.empLastName, role_id: roleResults[0][0].id, manager_id: mgrResults[0][0].id}, (err) => {
         if (err) reject (err);
         resolve();
         console.log(`Added ${answers.empFirstName + ` ` + answers.empLastName} to the database`);
         return initialPrompt();
         })
     
-
-
-
-    /*if (err) reject (err);*/
     resolve();
-    //return initialPrompt();
+
   });
 });
 };
