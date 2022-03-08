@@ -3,12 +3,27 @@ const fs = require('fs'); // Can probably remove this one.
 const Department = require('./lib/Department')
 const Employee = require('./lib/Employee')
 const Role = require('./lib/Role')
-const server = require('./server.js')
+const cTable = require('console.table');
+//const server = require('./server.js')
 
 var allEmployees = [];
 var allRoles = [];
 var allDepartments = [];
 
+// Require mysql2
+const mysql = require('mysql2');
+
+// Connect to database
+const db = mysql.createConnection(
+  {
+    host: 'localhost',
+    // MySQL username,
+    user: 'root',
+    password: '',
+    database: 'organization_db'
+  },
+  console.log(`Connected to the organization_db database.`)
+);
 
 
 const initialPrompt = () => {
@@ -36,16 +51,39 @@ const initialPrompt = () => {
       } else if (answers.whattodo == "Add Department") {
         return addDepartment();
       } else if (answers.whattodo == "Quit") {
-        return; //Not sure what else to do here yet.
+        console.log("Exiting program");
+        return init();
       }
-
     });
   };
 
 // Presents user with a report of all employees.
-const viewAllEmployees = async () => {
-  const choices = await organization_db
+/*
+const viewAllEmployees = () => {
 
+  db.promise().query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id FROM employees_tb LEFT JOIN roles_tb ON employees_tb.role_id = roles_tb.id LEFT JOIN departments_tb ON roles_tb.department_id = departments_tb.id;`
+    .then( ([rows,fields]) => {
+      console.log(rows);
+    })
+    .catch(console.log)
+    .then( () => db.end()));
+};
+*/
+
+const viewAllEmployees = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id
+      FROM employees_tb
+      LEFT JOIN roles_tb
+      ON employees_tb.role_id = roles_tb.id
+      LEFT JOIN departments_tb
+      ON roles_tb.department_id = departments_tb.id;`, (err, res) => {
+          if (err) reject(err);
+          console.table(res);
+          resolve(res);
+          return initialPrompt();
+      });
+  });
 }
 
 // Allows user to add employee.
@@ -112,10 +150,21 @@ const updateEmployeeRole = () => {
 };
 
 // Presents user with a report of all roles.
-const viewAllRoles = async () => {
-
-
+const viewAllRoles = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT roles_tb.title, roles_tb.id, departments_tb.department_name, roles_tb.salary
+      FROM roles_tb
+      LEFT JOIN departments_tb
+      ON roles_tb.department_id = departments_tb.id;`, (err, res) => {
+          if (err) reject(err);
+          console.table(res);
+          resolve(res);
+          return initialPrompt();
+      });
+  });
 }
+
+
 
 // Allows user to add a role to the organization.
 const addRole = () => {
@@ -147,9 +196,16 @@ const addRole = () => {
 };
 
 // Presents user with a report of all departments.
-const viewAllDepartments = async () => {
-
-
+const viewAllDepartments = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT departments_tb.department_name, departments_tb.id
+      FROM departments_tb;`, (err, res) => {
+          if (err) reject(err);
+          console.table(res);
+          resolve(res);
+          return initialPrompt();
+      });
+  });
 }
 
 // Allows user to add a department to the organization.
@@ -169,8 +225,6 @@ const addDepartment = () => {
 
   });
 };
-
-
 
 // This function triggers all user prompts upon running "node index.js" from the command line.
 const init = () => {
