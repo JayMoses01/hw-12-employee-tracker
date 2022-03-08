@@ -19,7 +19,7 @@ const db = mysql.createConnection(
     host: 'localhost',
     // MySQL username,
     user: 'root',
-    password: '',
+    password: 'JMSuccess2022!',
     database: 'organization_db'
   },
   console.log(`Connected to the organization_db database.`)
@@ -87,39 +87,45 @@ const viewAllEmployees = () => {
 }
 
 // Allows user to add employee.
-const addEmployee = () => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'empFirstName',
-      message: "What is the employee's first name?",
-    },
-    {
-      type: 'input',
-      name: 'empLastName',
-      message: "What is the employee's last name?",
-    },
-    {
-      type: 'input',
-      name: 'empRole',
-      message: "What is the employee's role?",
-      // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
-      choices: ["Customer Service","Sales Lead","Salesperson","Lead Engineer","Software Engineer","Account Manager","Accountant","Legal Team Lead","Lawyer"] // Use variable called "empRoles"
-    },
-    {
-      type: 'input',
-      name: 'empMgr',
-      message: "Who is the employee's manager?",
-      // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
-      choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"] // Use variable called "employees"
-    },
+const addEmployee = async () => {
+  let roleChoices = await availableRoles();
+  console.log(roleChoices);
+  return new Promise( (resolve, reject) => {
+    return inquirer.prompt([
+      {
+        type: 'input',
+        name: 'empFirstName',
+        message: "What is the employee's first name?",
+      },
+      {
+        type: 'input',
+        name: 'empLastName',
+        message: "What is the employee's last name?",
+      },
+      {
+        type: 'list',
+        name: 'empRole',
+        message: "What is the employee's role?",
+        choices: roleChoices,
+      },
+      {
+        type: 'input',
+        name: 'empMgr',
+        message: "Who is the employee's manager?",
+        // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
+        choices: ["None","John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kumal Singh","Malia Brown"] // Use variable called "employees"
+      },
   ])
   .then((answers) => {
     let employee = new Employee(answers.empFirstName, answers.empLastName, answers.empRole, answers.empMgr);
-    allEmployees.push(employee);
+    db.query(`INSERT INTO employees_tb (first_name, last_name, role_id, manager_id)
+    VALUES (?)`, employee)
     console.log(`Added ${answers.empFirstName + answers.empLastName} to the database`)
+    if (err) reject (err);
+    resolve();
     return initialPrompt();
   });
+});
 };
 
 // Allows user to update an employee's role with the organization.
@@ -163,6 +169,17 @@ const viewAllRoles = () => {
       });
   });
 }
+
+const availableRoles = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT roles_tb.title FROM roles_tb;`, (err, res) => {
+          if (err) reject(err);
+          resolve(res);
+      });
+  });
+}
+
+availableRoles();
 
 
 
