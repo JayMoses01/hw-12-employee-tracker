@@ -1,3 +1,4 @@
+/* Creating seeded departments in the departments_tb table. */
 INSERT INTO departments_tb (department_name)
 VALUES ("Engineering"),
        ("Finance"),
@@ -5,6 +6,7 @@ VALUES ("Engineering"),
        ("Sales"),
        ("Service");
 
+/* Creating seeded roles in the roles_tb table. */
 INSERT INTO roles_tb (title, salary, department_id)
 VALUES ("Sales Lead", 85000, 4),
        ("Lead Engineer", 85000, 1),
@@ -15,6 +17,7 @@ VALUES ("Sales Lead", 85000, 4),
        ("Accountant", 85000, 2),
        ("Lawyer", 85000, 3);
 
+/* Creating seeded employees in the employees_tb table. */
 INSERT INTO employees_tb (first_name, last_name, role_id, manager_id)
 VALUES ("John", "Doe", 1, NULL),
        ("Mike", "Chan", 2, NULL),

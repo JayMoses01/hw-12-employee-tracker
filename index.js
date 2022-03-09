@@ -1,8 +1,5 @@
+// Requiring NPM Inquirer and Console.Table packages.
 const inquirer = require('inquirer');
-//const fs = require('fs'); // Can probably remove this one.
-//const Department = require('./lib/Department')
-//const Employee = require('./lib/Employee')
-//const Role = require('./lib/Role')
 const cTable = require('console.table');
 
 // Requiring mysql2.
@@ -54,12 +51,14 @@ const initialPrompt = () => {
 // Presents the user with a report of all employees: employee ID's, first names, last names, job titles, departments, salaries, and managers that the employees report to.
 const viewAllEmployees = () => {
   return new Promise((resolve, reject) => {
-      db.query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id
+      db.query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id, CONCAT_WS(' ', managers_list.first_name, managers_list.last_name) AS manager_name
       FROM employees_tb
       LEFT JOIN roles_tb
       ON employees_tb.role_id = roles_tb.id
       LEFT JOIN departments_tb
-      ON roles_tb.department_id = departments_tb.id;`, (err, res) => {
+      ON roles_tb.department_id = departments_tb.id
+      LEFT JOIN employees_tb managers_list
+      ON employees_tb.manager_id = managers_list.id;`, (err, res) => {
           if (err) reject(err);
           console.table(res);
           resolve(res);
@@ -72,8 +71,7 @@ const viewAllEmployees = () => {
 const addEmployee = async () => {
   let roleChoices = await availableRoles();
   let mgrChoices = await availableManagers();
-  console.log(roleChoices);
-  console.log(mgrChoices);
+
   return new Promise( (resolve, reject) => {
     return inquirer.prompt([
       {
@@ -105,9 +103,6 @@ const addEmployee = async () => {
 
     let mgrResults = await db.promise().query(`SELECT employees_tb.id FROM employees_tb WHERE CONCAT_WS(' ',employees_tb.first_name, employees_tb.last_name) = ?`, [answers.empMgr]);
 
-    console.log(roleResults[0][0].id);
-    console.log(mgrResults[0][0].id);
-
     db.query(`INSERT INTO employees_tb SET ?`, {first_name: answers.empFirstName, last_name: answers.empLastName, role_id: roleResults[0][0].id, manager_id: mgrResults[0][0].id}, (err) => {
         if (err) reject (err);
         resolve();
@@ -125,8 +120,7 @@ const addEmployee = async () => {
 const updateEmployeeRole = async () => {
   let empChoices = await availableEmployees();
   let roleChoices = await availableRoles();
-  console.log(empChoices);
-  console.log(roleChoices);
+
   return new Promise( (resolve, reject) => {
     return inquirer.prompt([
       {
@@ -147,9 +141,6 @@ const updateEmployeeRole = async () => {
     let roleResults = await db.promise().query('SELECT roles_tb.id FROM `roles_tb` WHERE `title` = ?', [answers.newEmpRole]);
 
     let empResults = await db.promise().query(`SELECT employees_tb.id FROM employees_tb WHERE CONCAT_WS(' ',employees_tb.first_name, employees_tb.last_name) = ?`, [answers.empToUpdate]);
-
-    console.log(roleResults[0][0].id);
-    console.log(empResults[0][0].id);
 
     db.query(`UPDATE employees_tb SET employees_tb.role_id = ? WHERE employees_tb.id = ?`, [roleResults[0][0].id, empResults[0][0].id], (err) => {
         if (err) reject (err);
@@ -232,7 +223,7 @@ availableEmployees();
 // Allows the user to add a role to the organization.
 const addRole = async () => {
   let deptChoices = await availableDepartments();
-  console.log(deptChoices);
+
   return new Promise( (resolve, reject) => {
     return inquirer.prompt([
       {
@@ -255,8 +246,6 @@ const addRole = async () => {
   .then(async (answers) => {
 
     let deptResults = await db.promise().query('SELECT departments_tb.id FROM `departments_tb` WHERE departments_tb.department_name = ?', [answers.newRoleDept]);
-
-    console.log(deptResults[0][0].id);
 
     db.query(`INSERT INTO roles_tb SET ?`, {title: answers.newRole, salary: answers.newRoleSalary, department_id: deptResults[0][0].id}, (err) => {
         if (err) reject (err);
