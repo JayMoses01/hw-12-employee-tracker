@@ -48,7 +48,7 @@ const initialPrompt = () => {
         return addDepartment();
       } else if (answers.whattodo == "Quit") {
         console.log("Exiting program");
-        //process.exitCode = 1;
+        process.exit();
         return init();
       }
     });
@@ -152,10 +152,10 @@ const updateEmployeeRole = async () => {
 
     let empResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empToUpdate]);
 
-    console.log(empResults[0][0].id);
     console.log(roleResults[0][0].id);
+    console.log(empResults[0][0].id);
 
-    db.query(`UPDATE employees_tb SET role_id = ? WHERE id = ?`, {role_id: roleResults[0][0].id, id: empResults[0][0].id}, (err) => {
+    db.query(`UPDATE employees_tb SET employees_tb.role_id = ? WHERE employees_tb.id = ?`, [roleResults[0][0].id, empResults[0][0].id], (err) => {
         if (err) reject (err);
         resolve();
         console.log(`Updated role for ${answers.empToUpdate} in the database`);
