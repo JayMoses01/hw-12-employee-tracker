@@ -58,18 +58,6 @@ const initialPrompt = () => {
   };
 
 // Presents user with a report of all employees.
-/*
-const viewAllEmployees = () => {
-
-  db.promise().query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id FROM employees_tb LEFT JOIN roles_tb ON employees_tb.role_id = roles_tb.id LEFT JOIN departments_tb ON roles_tb.department_id = departments_tb.id;`
-    .then( ([rows,fields]) => {
-      console.log(rows);
-    })
-    .catch(console.log)
-    .then( () => db.end()));
-};
-*/
-
 const viewAllEmployees = () => {
   return new Promise((resolve, reject) => {
       db.query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id
@@ -86,7 +74,7 @@ const viewAllEmployees = () => {
   });
 }
 
-// Allows user to add employee.
+// Allows user to add an employee.
 const addEmployee = async () => {
   let roleChoices = await availableRoles();
   let mgrChoices = await availableManagers();
@@ -206,7 +194,24 @@ const availableManagers = () => {
 availableManagers();
 
 
+const availableDepartments = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT departments_tb.department_name
+      FROM departments_tb;`, (err, res) => {
+          if (err) reject(err);
+          resolve(res);
+      });
+  });
+}
+
+availableDepartments();
+
+
+
+
+
 // Allows user to add a role to the organization.
+/*
 const addRole = () => {
   return inquirer.prompt([
     {
@@ -234,6 +239,61 @@ const addRole = () => {
     return initialPrompt();
   });
 };
+*/
+
+const addRole = async () => {
+  let deptChoices = await availableDepartments();
+  console.log(deptChoices);
+  return new Promise( (resolve, reject) => {
+    return inquirer.prompt([
+      {
+        type: 'input',
+        name: 'newRole',
+        message: "What is the name of the role?",
+      },
+      {
+        type: 'input',
+        name: 'newRoleSalary',
+        message: "What is the salary of the role?",
+      },
+      {
+        type: 'list',
+        name: 'newRoleDept',
+        message: "Which department does the role belong to?",
+        choices: deptChoices.map(item => item.department_name),
+      },
+    ])
+  .then(async (answers) => {
+
+    let deptResults = await db.promise().query('SELECT departments_tb.id FROM `departments_tb` WHERE departments_tb.department_name = ?', [answers.newRoleDept]);
+
+    console.log(deptResults[0][0].id);
+
+    db.query(`INSERT INTO roles_tb SET ?`, {title: answers.newRole, salary: answers.newRoleSalary, department_id: deptResults[0][0].id}, (err) => {
+        if (err) reject (err);
+        resolve();
+        console.log(`Added ${answers.newRole} to the database`);
+        return initialPrompt();
+        })
+    
+    resolve();
+
+  });
+});
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Presents user with a report of all departments.
 const viewAllDepartments = () => {
