@@ -148,14 +148,14 @@ const updateEmployeeRole = async () => {
   ])
   .then(async (answers) => {
 
-    let empResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empToUpdate]);
-
     let roleResults = await db.promise().query('SELECT roles_tb.id FROM `roles_tb` WHERE `title` = ?', [answers.newEmpRole]);
+
+    let empResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empToUpdate]);
 
     console.log(empResults[0][0].id);
     console.log(roleResults[0][0].id);
 
-    db.query(`UPDATE employees_tb SET employees_tb.role_id = ? WHERE employees_tb.id = ?`, {role_id: roleResults[0][0].id, id: empResults[0][0].id}, (err) => {
+    db.query(`UPDATE employees_tb SET role_id = ? WHERE id = ?`, {role_id: roleResults[0][0].id, id: empResults[0][0].id}, (err) => {
         if (err) reject (err);
         resolve();
         console.log(`Updated role for ${answers.empToUpdate} in the database`);
@@ -167,18 +167,6 @@ const updateEmployeeRole = async () => {
   });
 });
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Presents user with a report of all roles.
