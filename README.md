@@ -20,6 +20,8 @@ I created an employee management system with the below functionality:
         * The user is prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database.
     * Update an employee's role
         * The user is prompted to select an employee to update and their new role and this information is updated in the database.
+    * Quit
+        * The user can exit the application by selecting "Quit".
 
 
 ## Screenshots of the application
