@@ -1,19 +1,17 @@
 const inquirer = require('inquirer');
-const fs = require('fs'); // Can probably remove this one.
-const Department = require('./lib/Department')
-const Employee = require('./lib/Employee')
-const Role = require('./lib/Role')
+//const fs = require('fs'); // Can probably remove this one.
+//const Department = require('./lib/Department')
+//const Employee = require('./lib/Employee')
+//const Role = require('./lib/Role')
 const cTable = require('console.table');
 
-
-// Require mysql2
+// Requiring mysql2.
 const mysql = require('mysql2');
 
-// Connect to database
+// Setting up the connection to the organization database.
 const db = mysql.createConnection(
   {
     host: 'localhost',
-    // MySQL username,
     user: 'root',
     password: 'JMSuccess2022!',
     database: 'organization_db'
@@ -21,7 +19,7 @@ const db = mysql.createConnection(
   console.log(`Connected to the organization_db database.`)
 );
 
-
+// This is the initial menu that allows the user to select what they would like to do and redirect them to the appropriate function based on their selection.
 const initialPrompt = () => {
     return inquirer.prompt([
       {
@@ -49,12 +47,11 @@ const initialPrompt = () => {
       } else if (answers.whattodo == "Quit") {
         console.log("Exiting program");
         process.exit();
-        return init();
       }
     });
   };
 
-// Presents user with a report of all employees.
+// Presents the user with a report of all employees: employee ID's, first names, last names, job titles, departments, salaries, and managers that the employees report to.
 const viewAllEmployees = () => {
   return new Promise((resolve, reject) => {
       db.query(`SELECT employees_tb.id, employees_tb.first_name, employees_tb.last_name, roles_tb.title, departments_tb.department_name, roles_tb.salary, employees_tb.manager_id
@@ -71,7 +68,7 @@ const viewAllEmployees = () => {
   });
 }
 
-// Allows user to add an employee.
+// Allows the user to add an employee to the organization.
 const addEmployee = async () => {
   let roleChoices = await availableRoles();
   let mgrChoices = await availableManagers();
@@ -106,7 +103,7 @@ const addEmployee = async () => {
 
     let roleResults = await db.promise().query('SELECT roles_tb.id FROM `roles_tb` WHERE `title` = ?', [answers.empRole]);
 
-    let mgrResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empMgr]);
+    let mgrResults = await db.promise().query(`SELECT employees_tb.id FROM employees_tb WHERE CONCAT_WS(' ',employees_tb.first_name, employees_tb.last_name) = ?`, [answers.empMgr]);
 
     console.log(roleResults[0][0].id);
     console.log(mgrResults[0][0].id);
@@ -124,8 +121,7 @@ const addEmployee = async () => {
 });
 };
 
-
-// Allows user to update an employee's role with the organization.
+// Allows the user to update an employee's role with the organization.
 const updateEmployeeRole = async () => {
   let empChoices = await availableEmployees();
   let roleChoices = await availableRoles();
@@ -150,7 +146,7 @@ const updateEmployeeRole = async () => {
 
     let roleResults = await db.promise().query('SELECT roles_tb.id FROM `roles_tb` WHERE `title` = ?', [answers.newEmpRole]);
 
-    let empResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empToUpdate]);
+    let empResults = await db.promise().query(`SELECT employees_tb.id FROM employees_tb WHERE CONCAT_WS(' ',employees_tb.first_name, employees_tb.last_name) = ?`, [answers.empToUpdate]);
 
     console.log(roleResults[0][0].id);
     console.log(empResults[0][0].id);
@@ -168,8 +164,7 @@ const updateEmployeeRole = async () => {
 });
 };
 
-
-// Presents user with a report of all roles.
+// Presents the user with a report of all roles.
 const viewAllRoles = () => {
   return new Promise((resolve, reject) => {
       db.query(`SELECT roles_tb.title, roles_tb.id, departments_tb.department_name, roles_tb.salary
@@ -184,6 +179,7 @@ const viewAllRoles = () => {
   });
 }
 
+// Produces a list of available roles that can be selected when adding an employee or updating an employee's role.
 const availableRoles = () => {
   return new Promise((resolve, reject) => {
       db.query(`SELECT roles_tb.title FROM roles_tb;`, (err, res) => {
@@ -195,10 +191,10 @@ const availableRoles = () => {
 
 availableRoles();
 
-
+// Produces a list of available managers that can be selected when adding an employee to the organization. 
 const availableManagers = () => {
   return new Promise((resolve, reject) => {
-      db.query(`SELECT CONCAT(employees_tb.first_name, employees_tb.last_name) AS Manager FROM employees_tb;`, (err, res) => {
+      db.query(`SELECT CONCAT_WS(' ',employees_tb.first_name,employees_tb.last_name) AS Manager FROM employees_tb;`, (err, res) => {
           if (err) reject(err);
           resolve(res);
       });
@@ -207,7 +203,7 @@ const availableManagers = () => {
 
 availableManagers();
 
-
+// Produces a list of available departments that can be selected when adding a role to the organization.
 const availableDepartments = () => {
   return new Promise((resolve, reject) => {
       db.query(`SELECT departments_tb.department_name
@@ -220,10 +216,10 @@ const availableDepartments = () => {
 
 availableDepartments();
 
-
+// Produces a list of available employees that can be selected when updating an employee's role in the organization.
 const availableEmployees = () => {
   return new Promise((resolve, reject) => {
-      db.query(`SELECT CONCAT(employees_tb.first_name, employees_tb.last_name) AS Employee
+      db.query(`SELECT CONCAT_WS(' ',employees_tb.first_name,employees_tb.last_name) AS Employee
       FROM employees_tb;`, (err, res) => {
           if (err) reject(err);
           resolve(res);
@@ -233,10 +229,7 @@ const availableEmployees = () => {
 
 availableEmployees();
 
-
-
-
-// Allows user to add a role to the organization.
+// Allows the user to add a role to the organization.
 const addRole = async () => {
   let deptChoices = await availableDepartments();
   console.log(deptChoices);
@@ -278,7 +271,7 @@ const addRole = async () => {
 });
 };
 
-// Presents user with a report of all departments.
+// Presents user with a report of all departments in the organization.
 const viewAllDepartments = () => {
   return new Promise((resolve, reject) => {
       db.query(`SELECT departments_tb.department_name, departments_tb.id
@@ -317,7 +310,6 @@ const addDepartment = async () => {
 });
 };
 
-
 // This function triggers all user prompts upon running "node index.js" from the command line.
 const init = () => {
     initialPrompt()
@@ -325,6 +317,3 @@ const init = () => {
   
 // This function calls the "init()" function to start the initial prompt.
 init();
-
-
-

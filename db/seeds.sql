@@ -25,4 +25,3 @@ VALUES ("John", "Doe", 1, NULL),
        ("Sarah", "Lourd", 7, NULL),
        ("Tom", "Allen", 8, 3),
        ("Sam", "Kash", 8, 3);
-
