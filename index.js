@@ -4,11 +4,7 @@ const Department = require('./lib/Department')
 const Employee = require('./lib/Employee')
 const Role = require('./lib/Role')
 const cTable = require('console.table');
-//const server = require('./server.js')
 
-var allEmployees = [];
-var allRoles = [];
-var allDepartments = [];
 
 // Require mysql2
 const mysql = require('mysql2');
@@ -52,6 +48,7 @@ const initialPrompt = () => {
         return addDepartment();
       } else if (answers.whattodo == "Quit") {
         console.log("Exiting program");
+        //process.exitCode = 1;
         return init();
       }
     });
@@ -129,31 +126,60 @@ const addEmployee = async () => {
 
 
 // Allows user to update an employee's role with the organization.
-const updateEmployeeRole = () => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'empToUpdate',
-      message: "Which employee's role do you want to update?",
-      // Choices should actually be a SELECT statement to return all current employees--not hard-coded.
-      choices: ["John Doe","Mike Chan","Ashley Rodriguez","Kevin Tupik","Kunal Singh","Malia Brown","Sarah Lourd","Tom Allen","Sam Kash"] // Use variable called "employees"
-    },
-    {
-      type: 'input',
-      name: 'newEmpRole',
-      message: "Which role do you want to assign the selected employee?",
-      // Choices should actually be a SELECT statement to return all current roles--not hard-coded.
-      choices: ["Sales Lead","Salesperson","Lead Engineer"]
-    },
+const updateEmployeeRole = async () => {
+  let empChoices = await availableEmployees();
+  let roleChoices = await availableRoles();
+  console.log(empChoices);
+  console.log(roleChoices);
+  return new Promise( (resolve, reject) => {
+    return inquirer.prompt([
+      {
+        type: 'list',
+        name: 'empToUpdate',
+        message: "Which employee's role do you want to update?",
+        choices: empChoices.map(item => item.Employee),
+      },
+      {
+        type: 'list',
+        name: 'newEmpRole',
+        message: "Which role do you want to assign the selected employee?",
+        choices: roleChoices.map(item => item.title),
+      },
   ])
-  .then((answers) => {
-    let department = new Department(answers.newDepartment);
-    allDepartments.push(department);
-    console.log(`Updated role for ${answers.empToUpdate} in the database`)
-    return initialPrompt();
+  .then(async (answers) => {
+
+    let empResults = await db.promise().query('SELECT employees_tb.id FROM `employees_tb` WHERE CONCAT(employees_tb.first_name, employees_tb.last_name) = ?', [answers.empToUpdate]);
+
+    let roleResults = await db.promise().query('SELECT roles_tb.id FROM `roles_tb` WHERE `title` = ?', [answers.newEmpRole]);
+
+    console.log(empResults[0][0].id);
+    console.log(roleResults[0][0].id);
+
+    db.query(`UPDATE employees_tb SET employees_tb.role_id = ? WHERE employees_tb.id = ?`, {role_id: roleResults[0][0].id, id: empResults[0][0].id}, (err) => {
+        if (err) reject (err);
+        resolve();
+        console.log(`Updated role for ${answers.empToUpdate} in the database`);
+        return initialPrompt();
+        })
+    
+    resolve();
 
   });
+});
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Presents user with a report of all roles.
 const viewAllRoles = () => {
@@ -207,40 +233,22 @@ const availableDepartments = () => {
 availableDepartments();
 
 
+const availableEmployees = () => {
+  return new Promise((resolve, reject) => {
+      db.query(`SELECT CONCAT(employees_tb.first_name, employees_tb.last_name) AS Employee
+      FROM employees_tb;`, (err, res) => {
+          if (err) reject(err);
+          resolve(res);
+      });
+  });
+}
+
+availableEmployees();
+
 
 
 
 // Allows user to add a role to the organization.
-/*
-const addRole = () => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'newRole',
-      message: "What is the name of the role?",
-    },
-    {
-      type: 'input',
-      name: 'newRoleSalary',
-      message: "What is the salary of the role?",
-    },
-    {
-      type: 'input',
-      name: 'newRoleDept',
-      message: "Which department does the role belong to?",
-      // Choices should actually be a SELECT statement to return all current departments--not hard-coded.
-      choices: ["Engineering","Finance","Legal","Sales","Service"]
-    },
-  ])
-  .then((answers) => {
-    let role = new Role(answers.newRole, answers.newRoleSalary, newRoleDept);
-    allRoles.push(role);
-    console.log(`Added ${answers.newRole} to the database`)
-    return initialPrompt();
-  });
-};
-*/
-
 const addRole = async () => {
   let deptChoices = await availableDepartments();
   console.log(deptChoices);
@@ -282,19 +290,6 @@ const addRole = async () => {
 });
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Presents user with a report of all departments.
 const viewAllDepartments = () => {
   return new Promise((resolve, reject) => {
@@ -309,22 +304,31 @@ const viewAllDepartments = () => {
 }
 
 // Allows user to add a department to the organization.
-const addDepartment = () => {
-  return inquirer.prompt([
-    {
-      type: 'input',
-      name: 'newDepartment',
-      message: "What is the name of the department?",
-    },
-  ])
-  .then((answers) => {
-    let department = new Department(answers.newDepartment);
-    allDepartments.push(department);
-    console.log(`Added ${answers.newDepartment} to the database`)
-    return initialPrompt();
+const addDepartment = async () => {
+
+  return new Promise( (resolve, reject) => {
+    return inquirer.prompt([
+      {
+        type: 'input',
+        name: 'newDepartment',
+        message: "What is the name of the department?",
+      },
+    ])
+  .then(async (answers) => {
+
+    db.query(`INSERT INTO departments_tb SET ?`, {department_name: answers.newDepartment}, (err) => {
+        if (err) reject (err);
+        resolve();
+        console.log(`Added ${answers.newDepartment} to the database`);
+        return initialPrompt();
+        })
+    
+    resolve();
 
   });
+});
 };
+
 
 // This function triggers all user prompts upon running "node index.js" from the command line.
 const init = () => {
